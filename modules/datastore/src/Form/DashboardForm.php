@@ -68,15 +68,11 @@ class DashboardForm extends FormBase {
 
   /**
    * The PostImportResultFactory service.
-   *
-   * @var \Drupal\datastore\PostImportResultFactory
    */
   protected PostImportResultFactory $postImportResultFactory;
 
   /**
    * Node storage service.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected EntityStorageInterface $nodeStorage;
 
@@ -512,7 +508,7 @@ class DashboardForm extends FormBase {
         'data' => [
           '#theme' => 'datastore_dashboard_revision_cell',
           '#revision_id' => $rev['revision_id'],
-          '#modified' => $this->dateFormatter->format(strtotime($rev['modified_date_dkan']), 'short'),
+          '#modified' => $this->dateFormatter->format(strtotime((string) $rev['modified_date_dkan']), 'short'),
           '#moderation_state' => $rev['moderation_state'],
         ],
       ],
@@ -545,7 +541,7 @@ class DashboardForm extends FormBase {
           'data' => [
             '#theme' => 'datastore_dashboard_resource_cell',
             '#uuid' => $dist['distribution_uuid'],
-            '#file_name' => basename($dist['source_path']),
+            '#file_name' => basename((string) $dist['source_path']),
             '#file_path' => UrlHostTokenResolver::resolve($dist['source_path']),
           ],
         ],
