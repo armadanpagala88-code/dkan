@@ -121,7 +121,6 @@ commands:
                   ddev composer update getdkan/dkan -W
                   ddev composer show getdkan/dkan
                   ddev dkan-site-install
-                  ddev drush updb -y
                   ddev drush rq
 
 jobs:
