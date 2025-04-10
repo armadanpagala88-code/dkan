@@ -18,9 +18,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Datastore importer.
  *
- * @todo This class has state and is not actually a service because it holds
- *   state. Have import() take an argument of a resource, instead of storing it
- *   as a property.
+ * Use the factory service (dkan.datastore.service.factory.import) to generate
+ * these.
+ *
+ * @see \Drupal\datastore\Service\Factory\ImportServiceFactory::getInstance
  */
 class ImportService {
 
@@ -142,7 +143,7 @@ class ImportService {
   }
 
   /**
-   * Import.
+   * Import resources into storage.
    */
   public function import() {
     $result = $this->getImporter()->run();

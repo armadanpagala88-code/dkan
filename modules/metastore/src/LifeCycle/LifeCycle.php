@@ -2,16 +2,16 @@
 
 namespace Drupal\metastore\LifeCycle;
 
-use Drupal\common\EventDispatcherTrait;
-use Drupal\common\DataResource;
-use Drupal\common\Exception\DataNodeLifeCycleEntityValidationException;
-use Drupal\common\UrlHostTokenResolver;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\common\DataResource;
+use Drupal\common\EventDispatcherTrait;
+use Drupal\common\Exception\DataNodeLifeCycleEntityValidationException;
+use Drupal\common\UrlHostTokenResolver;
 use Drupal\metastore\MetastoreItemInterface;
 use Drupal\metastore\Reference\Dereferencer;
 use Drupal\metastore\Reference\MetastoreUrlGenerator;
@@ -103,7 +103,7 @@ class LifeCycle {
     DateFormatter $dateFormatter,
     DataFactory $dataFactory,
     QueueFactory $queueFactory,
-    ConfigFactory $configFactory
+    ConfigFactory $configFactory,
   ) {
     $this->referencer = $referencer;
     $this->dereferencer = $dereferencer;
@@ -118,6 +118,14 @@ class LifeCycle {
   /**
    * Entry point for LifeCycle functions.
    *
+   * Based on the schema of the $data object and the $stage, we generate a
+   * method name. If that method name exists on this class, we call it.
+   * Example: Stage 'load' for a dataset metastore item becomes 'datasetLoad'.
+   *
+   * Currently, this method handles hook implementations for Data nodes via
+   * wrappers, but might be expected to handle arbitrary entities in the
+   * future.
+   *
    * @param string $stage
    *   Stage or hook name for execution.
    * @param \Drupal\metastore\MetastoreItemInterface $data
@@ -126,20 +134,18 @@ class LifeCycle {
   public function go(string $stage, MetastoreItemInterface $data): void {
     // Removed dashes from schema ID since function names can't include dashes.
     $schema_id = str_replace('-', '', $data->getSchemaId());
-    $stage = ucwords($stage);
-    // Build method name from schema ID and stage.
-    $method = "{$schema_id}{$stage}";
-    // Ensure a method exists for this life cycle stage.
-    if (method_exists($this, $method)) {
+    // Build method name from schema ID and stage, ensure it exists for this
+    // life cycle stage.
+    if (method_exists($this, $method = $schema_id . ucwords($stage))) {
       // Call life cycle method on metastore item.
-      $this->{$method}($data);
+      $this->$method($data);
     }
   }
 
   /**
    * Dataset preDelete.
    */
-  protected function datasetPredelete(MetastoreItemInterface $data) {
+  protected function datasetPredelete(MetastoreItemInterface $data): void {
     $raw = $data->getRawMetadata();
 
     if (is_object($raw)) {
@@ -149,8 +155,14 @@ class LifeCycle {
 
   /**
    * Dataset load.
+   *
+   * @todo This behavior should be on-demand instead of always happening when
+   *   the node loads, since not all dataset nodes will need to be
+   *   dereferenced.
+   *
+   * @see \metastore_node_load()
    */
-  protected function datasetLoad(MetastoreItemInterface $data) {
+  protected function datasetLoad(MetastoreItemInterface $data): void {
     $metadata = $data->getMetaData();
 
     // Dereference dataset properties.
@@ -163,7 +175,7 @@ class LifeCycle {
   /**
    * Purge resources (if unneeded) of any updated dataset.
    */
-  protected function datasetUpdate(MetastoreItemInterface $data) {
+  protected function datasetUpdate(MetastoreItemInterface $data): void {
     $this->dispatchEvent(self::EVENT_DATASET_UPDATE, $data);
   }
 
@@ -179,8 +191,14 @@ class LifeCycle {
    * @todo For consistency, this should either be abstracted so that it is not
    * so tightly coupled with the distribution schema, or we should better
    * document that DKAN only supports DCAT standard.
+   *
+   * @todo This behavior should be on-demand instead of always happening when
+   *   the node loads, since not all node loads will need dereferenced download
+   *   URLs.
+   *
+   * @see \metastore_node_load()
    */
-  protected function distributionLoad(MetastoreItemInterface $data) {
+  protected function distributionLoad(MetastoreItemInterface $data): void {
     $metadata = $data->getMetaData();
 
     if (!isset($metadata->data->downloadURL)) {
@@ -215,7 +233,7 @@ class LifeCycle {
   /**
    * Distribution predelete.
    */
-  protected function distributionPredelete(MetastoreItemInterface $data) {
+  protected function distributionPredelete(MetastoreItemInterface $data): void {
     $distributionUuid = $data->getIdentifier();
 
     $storage = $this->dataFactory->getInstance('distribution');
