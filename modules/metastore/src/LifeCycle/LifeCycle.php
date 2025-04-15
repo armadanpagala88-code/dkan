@@ -9,8 +9,8 @@ use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\common\DataResource;
-use Drupal\common\EventDispatcherTrait;
 use Drupal\common\Exception\DataNodeLifeCycleEntityValidationException;
+use Drupal\common\Events\Event;
 use Drupal\common\UrlHostTokenResolver;
 use Drupal\metastore\MetastoreItemInterface;
 use Drupal\metastore\Reference\Dereferencer;
@@ -19,6 +19,7 @@ use Drupal\metastore\Reference\OrphanChecker;
 use Drupal\metastore\Reference\Referencer;
 use Drupal\metastore\ResourceMapper;
 use Drupal\metastore\Storage\DataFactory;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Abstraction of logic used in entity hooks.
@@ -31,7 +32,6 @@ use Drupal\metastore\Storage\DataFactory;
  * storage systems.
  */
 class LifeCycle {
-  use EventDispatcherTrait;
 
   const EVENT_DATASET_UPDATE = 'dkan_metastore_dataset_update';
   const EVENT_PRE_REFERENCE = 'dkan_metastore_metadata_pre_reference';
@@ -93,6 +93,13 @@ class LifeCycle {
   protected $configFactory;
 
   /**
+   * Event dispatcher service.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructor.
    */
   public function __construct(
@@ -104,6 +111,7 @@ class LifeCycle {
     DataFactory $dataFactory,
     QueueFactory $queueFactory,
     ConfigFactory $configFactory,
+    EventDispatcherInterface $eventDispatcher
   ) {
     $this->referencer = $referencer;
     $this->dereferencer = $dereferencer;
@@ -113,6 +121,7 @@ class LifeCycle {
     $this->dataFactory = $dataFactory;
     $this->queueFactory = $queueFactory;
     $this->configFactory = $configFactory;
+    $this->eventDispatcher = $eventDispatcher;
   }
 
   /**
@@ -176,7 +185,8 @@ class LifeCycle {
    * Purge resources (if unneeded) of any updated dataset.
    */
   protected function datasetUpdate(MetastoreItemInterface $data): void {
-    $this->dispatchEvent(self::EVENT_DATASET_UPDATE, $data);
+    $event = new Event($data);
+    $this->eventDispatcher->dispatch($event, self::EVENT_DATASET_UPDATE);
   }
 
   /**
@@ -338,9 +348,10 @@ class LifeCycle {
 
     // Trigger datastore import if applicable.
     // Needs to happen before updating references.
-    $this->dispatchEvent(self::EVENT_PRE_REFERENCE, $data, function ($data) {
-      return $data instanceof MetastoreItemInterface;
-    });
+    if ($data instanceof MetastoreItemInterface) {
+      $event = new Event($data);
+      $this->eventDispatcher->dispatch($event, self::EVENT_PRE_REFERENCE);
+    }
 
     // Convert references in metadata to uuids.
     // Create new reference entities if they do not exist.
