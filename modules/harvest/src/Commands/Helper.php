@@ -2,7 +2,7 @@
 
 namespace Drupal\harvest\Commands;
 
-use Harvest\ResultInterpreter;
+use Drupal\harvest\ResultInterpreter;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
 

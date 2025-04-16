@@ -10,7 +10,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\Url;
 use Drupal\harvest\Entity\HarvestRunRepository;
-use Harvest\ResultInterpreter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 

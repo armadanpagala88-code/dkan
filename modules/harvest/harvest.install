@@ -16,8 +16,8 @@ function harvest_requirements($phase): array {
         $requirements['dkan harvest leftover data'] = [
           'title' => t('DKAN Harvest Leftover Plan Data'),
           'value' => t('Leftover harvest data for plans: @plans', [
-            '@plans' => implode(', ', $leftover_harvest_data_ids)
-            ]),
+            '@plans' => implode(', ', $leftover_harvest_data_ids),
+          ]),
           'description' => t(
             'DKAN\'s harvest module has detected extra unneeded data tables.
             You can remove them using this Drush command from the CLI:
@@ -111,7 +111,7 @@ function harvest_update_8007(&$sandbox) {
  * Move entries from harvest_[ID]_runs to harvest_runs.
  *
  * This finishes the process started by harvest_update_8007.
-*/
+ */
 function harvest_update_8008(&$sandbox) {
   // Moved and repeated to 8010.
 }
@@ -211,4 +211,14 @@ function harvest_update_8011(&$sandbox) {
     $harvest_utility = \Drupal::service('dkan.harvest.utility');
     $harvest_utility->harvestRunsUpdate();
     return 'Harvest plan specific run tables coalesced into table harvest_runs.';
+}
+
+/**
+ * Updates namespace for harvest type.
+ */
+function harvest_update_10001()
+{
+  /** @var \Drupal\harvest\HarvestUtility $harvest_utility */
+  $harvest_utility = \Drupal::service('dkan.harvest.utility');
+  $harvest_utility->harvestNammespaceUpdate();
 }

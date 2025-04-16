@@ -50,7 +50,7 @@ class HarvestRunRepository {
    */
   public function __construct(
     Connection $connection,
-    EntityTypeManagerInterface $entityTypeManager
+    EntityTypeManagerInterface $entityTypeManager,
   ) {
     $this->connection = $connection;
     $this->runStorage = $entityTypeManager->getStorage('harvest_run');
@@ -95,7 +95,7 @@ class HarvestRunRepository {
    * @return string
    *   The run identifier.
    *
-   * @see \Harvest\Harvester::harvest()
+   * @see \Drupal\harvest\Harvester::harvest()
    *
    * @todo Eventually all the subsystems will be able to understand the entity
    *   rather than needing conversion to and from the array format.

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\harvest\Kernel;
 
 use Drupal\harvest\HarvestPlanListBuilder;
 use Drupal\harvest\HarvestService;
 use Drupal\KernelTests\KernelTestBase;
-use Harvest\ETL\Extract\DataJson;
-use Harvest\ETL\Load\Simple;
+use Drupal\harvest\ETL\Extract\DataJson;
+use Drupal\harvest\ETL\Load\Simple;
 
 /**
  * @covers \Drupal\harvest\HarvestPlanListBuilder
@@ -108,7 +110,7 @@ class HarvestPlanListBuilderTest extends KernelTestBase {
     $strings = array_merge(self::HARVEST_HEADERS, [
       'harvest_link',
       'SUCCESS',
-      json_encode(date('m/d/y H:m:s T', $run_result['identifier'])),
+      json_encode(date('m/d/y H:m:s T', (int)$run_result['identifier'])),
       '2',
     ]);
     foreach ($strings as $string) {

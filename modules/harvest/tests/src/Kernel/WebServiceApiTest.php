@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\harvest\Kernel;
 
 use Drupal\harvest\HarvestService;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\harvest\WebServiceApi;
-use Harvest\ETL\Extract\DataJson;
-use Harvest\ETL\Load\Simple;
+use Drupal\KernelTests\KernelTestBase;
+use Drupal\harvest\ETL\Extract\DataJson;
+use Drupal\harvest\ETL\Load\Simple;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
