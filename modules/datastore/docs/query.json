@@ -165,7 +165,8 @@
                         ]
                     }
                 }
-            }
+            },
+            "required": ["conditions"]
         },
         "condition": {
             "type": "object",
