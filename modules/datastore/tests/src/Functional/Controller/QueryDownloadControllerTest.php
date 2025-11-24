@@ -124,13 +124,27 @@ class QueryDownloadControllerTest extends BrowserTestBase {
       'id,name,extra_long_column_name_with_tons_of_characters_that_will_ne_e872,extra_long_column_name_with_tons_of_characters_that_will_ne_5127',
       $lines[0]
     );
+
+    // Test for valid field names in json output
+    // Query for the dataset, as a streaming JSON.
+    $client = $this->getHttpClient();
+    $response = $client->request(
+      'GET',
+      $this->baseUrl . '/api/1/datastore/query/' . $dataset_id . '/0/download',
+      ['query' => ['format' => 'json']]
+    );
+
+    $json_content = json_decode($response->getBody()->getContents())->results[0];
+    $titles = array_keys(get_object_vars($json_content));
+    $this->assertEquals('id,name,extra_long_column_name_with_tons_of_characters_that_will_ne_e872,extra_long_column_name_with_tons_of_characters_that_will_ne_5127',
+      implode(',',$titles));
   }
 
   /**
    * Test application of data dictionary schema to CSV generated for download.
    */
   public function testDownloadWithDataDictionary() {
-    // Set per-reference data-dictinary in metastore config.
+    // Set per-reference data-dictionary in metastore config.
     $this->config('metastore.settings')
       ->set('data_dictionary_mode', DataDictionaryDiscovery::MODE_REFERENCE)
       ->save();
