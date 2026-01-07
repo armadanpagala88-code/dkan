@@ -10,9 +10,9 @@ export default defineConfig(() => {
         output: {
           entryFileNames: `js/[name].js`,
           chunkFileNames: `js/chunks/[name].[hash].js`,
-          assetFileNames: ({name}) => {           
+          assetFileNames: ({ name }) => {
             if (/\.css$/.test(name ?? '')) {
-                return `css/[name].[ext]`;   
+              return `css/[name].[ext]`;
             }
             // default value
             return 'media/[name].[ext]';
@@ -25,7 +25,7 @@ export default defineConfig(() => {
       port: 3000,
       proxy: {
         '/api/1': {
-          target: 'https://demo.getdkan.org',
+          target: 'http://dkan.ddev.site',
           changeOrigin: true,
         }
       }
