@@ -25,7 +25,7 @@ export default defineConfig(() => {
       port: 3000,
       proxy: {
         '/api/1': {
-          target: 'http://dkan.ddev.site',
+          target: 'http://127.0.0.1:62579',
           changeOrigin: true,
         }
       }
